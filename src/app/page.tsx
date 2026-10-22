@@ -30,11 +30,11 @@ import {
 // Map service slug to real generated images
 const SERVICE_IMAGE_MAP: Record<string, string> = {
   "warehouse-helper-picker-packer": "/images/picker_packer.jpg",
-  "forklift-operator-material-handling": "/images/forklift_operator.jpg",
-  "inventory-controller-sorting": "/images/facility_team.jpg",
-  "loading-unloading-crew": "/images/hero_warehouse.jpg",
-  "commercial-facility-cleaning": "/images/facility_team.jpg",
-  "seasonal-peak-warehouse-scaling": "/images/hero_warehouse.jpg",
+  "order-picker-staff": "/images/service_order_picker.jpg",
+  "warehouse-packers": "/images/service_packing_dispatch.jpg",
+  "warehouse-helpers-loading-unloading": "/images/service_loading_unloading.jpg",
+  "facility-management-services": "/images/service_facility_cleaning.jpg",
+  "inventory-counting-supervision": "/images/service_inventory_audit.jpg",
 };
 
 export default function HomePage() {
