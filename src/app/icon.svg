@@ -1,0 +1,22 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAB028" />
+      <stop offset="100%" stop-color="#E88030" />
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#0284C7" />
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="100" height="100" rx="22" fill="#080F1A" />
+  <rect width="96" height="96" x="2" y="2" rx="20" fill="none" stroke="#1E293B" stroke-width="2" />
+  
+  <!-- Stylized Geometric V Emblem -->
+  <!-- Left Amber Wing -->
+  <path d="M 24 28 L 44 28 L 50 42 L 39 42 L 48 64 L 43 74 L 28 40 L 37 40 Z" fill="url(#amberGrad)" />
+  
+  <!-- Right Blue Wing Interlocking -->
+  <path d="M 76 28 L 56 28 L 48 46 L 53 58 L 72 38 L 63 38 L 49 68 L 54 74 L 76 28 Z" fill="url(#blueGrad)" opacity="0.95" />
+</svg>

@@ -1,0 +1,71 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Inquiry {
+  id          String   @id @default(uuid())
+  name        String
+  email       String
+  phone       String
+  company     String?
+  service     String
+  staffCount  String?
+  shiftType   String?
+  urgency     String   @default("Immediate (24-48 hrs)")
+  location    String   @default("Dubai / UAE")
+  message     String?
+  status      String   @default("NEW") // NEW, CONTACTED, IN_PROGRESS, CONVERTED, ARCHIVED
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  shortDesc   String
+  fullDesc    String
+  category    String   @default("Warehouse Manpower")
+  icon        String   @default("Box")
+  features    String   // JSON string of string[]
+  benefits    String   // JSON string of string[]
+  active      Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Testimonial {
+  id          String   @id @default(uuid())
+  clientName  String
+  company     String
+  designation String
+  quote       String
+  rating      Int      @default(5)
+  sector      String
+  createdAt   DateTime @default(now())
+}
+
+model FaqItem {
+  id          String   @id @default(uuid())
+  question    String
+  answer      String
+  category    String   @default("General")
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model SiteContent {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+}

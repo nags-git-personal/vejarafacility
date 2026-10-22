@@ -1,0 +1,27 @@
+name: Deploy VejaraFacility to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Execute Deployment on VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 72.61.232.252
+          username: ${{ secrets.VPS_SSH_USER }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          script: |
+            echo "--> Navigating to /var/www/vejarafacility..."
+            cd /var/www/vejarafacility
+            echo "--> Running deploy script..."
+            chmod +x scripts/deploy.sh
+            ./scripts/deploy.sh
