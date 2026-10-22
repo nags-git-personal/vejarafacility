@@ -1,39 +1,45 @@
-﻿@tailwind base;
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
+    --background: 0 0% 100%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 217 65% 38%;
+    --primary: 201 96% 40%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 222 47% 11%;
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
-    --accent: 28 85% 55%;
+    --accent: 199 89% 48%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 217 65% 38%;
-    --radius: 0.625rem;
+    --ring: 201 96% 40%;
+    --radius: 0.75rem;
   }
 }
 
 body {
-  color: hsl(var(--foreground));
-  background: #080F1A;
-  font-family: var(--font-inter), system-ui, sans-serif;
+  color: #0F172A;
+  background-color: #FFFFFF;
+  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
   overflow-x: hidden;
 }
 
 html {
   scroll-behavior: smooth;
+}
+
+.font-script {
+  font-family: 'Caveat', cursive, sans-serif;
 }

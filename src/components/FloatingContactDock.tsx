@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -43,15 +43,15 @@ export function FloatingContactDock() {
           {/* Direct Phone Call */}
           <a
             href={telHref}
-            className="group flex items-center gap-3 bg-slate-900/95 hover:bg-[#E88030] text-white hover:text-slate-950 px-4 py-2.5 rounded-full shadow-2xl border border-slate-700 hover:border-[#E88030] transition-all duration-300 transform hover:-translate-x-1"
+            className="group flex items-center gap-3 bg-slate-900/95 hover:bg-[#0284C7] text-white hover:text-white px-4 py-2.5 rounded-full shadow-2xl border border-slate-700 hover:border-[#0284C7] transition-all duration-300 transform hover:-translate-x-1"
           >
             <div className="flex flex-col text-right">
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-amber-400 group-hover:text-slate-900">
+              <span className="text-[10px] font-semibold tracking-wider uppercase text-sky-400 group-hover:text-white">
                 Direct Line
               </span>
               <span className="text-xs font-bold">{phone}</span>
             </div>
-            <div className="w-9 h-9 rounded-full bg-[#E88030] text-slate-950 flex items-center justify-center font-bold shadow-md">
+            <div className="w-9 h-9 rounded-full bg-[#0284C7] text-white flex items-center justify-center font-bold shadow-md">
               <Phone className="w-4 h-4 fill-current" />
             </div>
           </a>
@@ -76,16 +76,16 @@ export function FloatingContactDock() {
 
           {/* Quick Quote Form Trigger */}
           <Link
-            href="#inquiry"
-            className="group flex items-center gap-3 bg-slate-900/95 hover:bg-blue-600 text-white px-4 py-2.5 rounded-full shadow-2xl border border-slate-700 hover:border-blue-500 transition-all duration-300 transform hover:-translate-x-1"
+            href="#quote"
+            className="group flex items-center gap-3 bg-slate-900/95 hover:bg-sky-600 text-white px-4 py-2.5 rounded-full shadow-2xl border border-slate-700 hover:border-sky-500 transition-all duration-300 transform hover:-translate-x-1"
           >
             <div className="flex flex-col text-right">
-              <span className="text-[10px] font-semibold tracking-wider uppercase text-blue-400 group-hover:text-white">
+              <span className="text-[10px] font-semibold tracking-wider uppercase text-sky-400 group-hover:text-white">
                 Online Quote
               </span>
-              <span className="text-xs font-bold">Request Staff Quote</span>
+              <span className="text-xs font-bold">Request Free Quote</span>
             </div>
-            <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-md">
+            <div className="w-9 h-9 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold shadow-md">
               <MessageSquare className="w-4 h-4" />
             </div>
           </Link>
@@ -96,7 +96,7 @@ export function FloatingContactDock() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Toggle Quick Contact"
-        className="relative flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-tr from-[#E88030] via-amber-500 to-[#25D366] text-slate-950 font-black shadow-2xl shadow-amber-500/40 hover:scale-105 active:scale-95 transition-all duration-300"
+        className="relative flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-tr from-[#0284C7] via-[#0066FF] to-[#25D366] text-white font-black shadow-2xl shadow-sky-500/40 hover:scale-105 active:scale-95 transition-all duration-300"
       >
         {isOpen ? (
           <X className="w-6 h-6 stroke-[2.5]" />
@@ -106,7 +106,7 @@ export function FloatingContactDock() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-90"></span>
               <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white"></span>
             </span>
-            <Sparkles className="w-6 h-6 fill-slate-950" />
+            <Sparkles className="w-6 h-6 fill-white" />
           </div>
         )}
       </button>

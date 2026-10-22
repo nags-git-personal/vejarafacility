@@ -1,561 +1,946 @@
-﻿import Link from "next/link";
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
 import {
-  INITIAL_SERVICES,
-  INITIAL_TESTIMONIALS,
-  INITIAL_FAQS,
-  INDUSTRY_SECTORS,
-} from "@/lib/initialData";
-import { ManpowerCalculator } from "@/components/ManpowerCalculator";
-import { Logo } from "@/components/Logo";
-import {
-  PackageCheck,
-  ShieldCheck,
-  Clock,
   Users,
-  CheckCircle2,
+  ShieldCheck,
+  RefreshCw,
+  Clock,
   ArrowRight,
-  Warehouse,
-  Truck,
-  Sparkles,
-  PhoneCall,
-  Star,
-  FileCheck2,
-  MapPin,
-  ChevronRight,
-  TrendingUp,
-  Headphones,
   Check,
+  Package,
+  HardHat,
+  Wrench,
+  Sparkles,
+  Star,
+  Handshake,
+  Building2,
+  Phone,
+  Mail,
+  MapPin,
+  Send,
+  CheckCircle2,
+  X,
+  ExternalLink,
 } from "lucide-react";
 
-// Map service slug to real generated images
-const SERVICE_IMAGE_MAP: Record<string, string> = {
-  "warehouse-helper-picker-packer": "/images/picker_packer.jpg",
-  "order-picker-staff": "/images/service_order_picker.jpg",
-  "warehouse-packers": "/images/service_packing_dispatch.jpg",
-  "warehouse-helpers-loading-unloading": "/images/service_loading_unloading.jpg",
-  "facility-management-services": "/images/service_facility_cleaning.jpg",
-  "inventory-counting-supervision": "/images/service_inventory_audit.jpg",
-};
+interface ServiceItem {
+  id: string;
+  title: string;
+  image: string;
+  icon: "package" | "hardhat" | "wrench" | "sparkles";
+  description: string;
+  points: string[];
+  fullDetails: string;
+}
+
+const SERVICES: ServiceItem[] = [
+  {
+    id: "labour-packing",
+    title: "Labour Packing",
+    image: "/images/service_labour_packing.jpg",
+    icon: "package",
+    description:
+      "Skilled and reliable labour for packing, labeling, sorting and general warehouse support.",
+    points: [
+      "Packing & labeling",
+      "Sorting & inspection",
+      "Warehouse support",
+    ],
+    fullDetails:
+      "Our Labour Packing workforce is vetted, trained in RF scanners, and prepared for high-volume fulfillment across 3PL warehouses, e-commerce distribution centers, and packaging facilities in Dubai and UAE. 100% MOHRE & WPS compliant.",
+  },
+  {
+    id: "construction-helper",
+    title: "Construction Helper",
+    image: "/images/service_construction_helper.jpg",
+    icon: "hardhat",
+    description:
+      "Trained and experienced helpers for construction and site support work.",
+    points: [
+      "Site labour",
+      "Material handling",
+      "General construction support",
+    ],
+    fullDetails:
+      "We provide robust, safety-inducted construction helpers for rebar handling, site cleanup, concrete staging, and scaffolding support. All staff hold valid UAE civil defense and construction safety gear (PPE).",
+  },
+  {
+    id: "maintenance-services",
+    title: "Maintenance Services",
+    image: "/images/service_maintenance.jpg",
+    icon: "wrench",
+    description:
+      "Professional maintenance support to keep your facilities in top condition.",
+    points: [
+      "Electrical",
+      "Plumbing",
+      "General maintenance",
+    ],
+    fullDetails:
+      "Preventive and reactive maintenance technicians for commercial towers, warehouses, and industrial estates. Experienced with electrical switchboards, MEP installations, pump rooms, and routine building upkeep.",
+  },
+  {
+    id: "cleaning-services",
+    title: "Cleaning Services",
+    image: "/images/service_cleaning_commercial.jpg",
+    icon: "sparkles",
+    description:
+      "Advanced cleaning solutions for a clean, healthy and safe environment.",
+    points: [
+      "Office & commercial cleaning",
+      "Building cleaning",
+      "Deep cleaning",
+    ],
+    fullDetails:
+      "Equipped with modern ride-on floor scrubbers, industrial polishers, and Dubai Municipality-approved sanitizing agents. Delivering spotless commercial hallways, executive offices, and heavy-duty industrial floors.",
+  },
+];
+
+interface GalleryItem {
+  id: string;
+  title: string;
+  category: string;
+  image: string;
+  description: string;
+}
+
+const GALLERY_ITEMS: GalleryItem[] = [
+  {
+    id: "gallery-packing",
+    title: "Labour Packing & Dispatch",
+    category: "Warehouse Logistics",
+    image: "/images/gallery_packing_line.jpg",
+    description: "High-throughput packing teams sorting, scanning, and packaging cartons onto automated conveyor lines in Dubai logistics hubs.",
+  },
+  {
+    id: "gallery-construction",
+    title: "Construction Helper Support",
+    category: "Civil & Construction",
+    image: "/images/gallery_construction_site.jpg",
+    description: "Safety-equipped construction helpers and rebar crews assembling skyscraper structural framework on prime UAE sites.",
+  },
+  {
+    id: "gallery-maintenance",
+    title: "Plant Room & MEP Maintenance",
+    category: "Technical Services",
+    image: "/images/gallery_mep_maintenance.jpg",
+    description: "Certified facility technicians performing preventive maintenance and diagnostics on commercial HVAC chillers and industrial pumps.",
+  },
+  {
+    id: "gallery-cleaning",
+    title: "Commercial & Atrium Cleaning",
+    category: "Janitorial Solutions",
+    image: "/images/gallery_commercial_cleaning.jpg",
+    description: "Professional cleaning teams sanitizing high-traffic corporate atriums, glass facades, and polished marble entrance lobbies.",
+  },
+];
 
 export default function HomePage() {
+  const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
+  const [galleryModalOpen, setGalleryModalOpen] = useState(false);
+  const [activeGalleryIndex, setActiveGalleryIndex] = useState(0);
+
+  // Form submission state
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    service: "Labour Packing",
+    contact: "",
+    message: "",
+  });
+
   const phone = process.env.NEXT_PUBLIC_CONTACT_PHONE || "+971 4 388 5003";
   const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "97143885003";
 
-  return (
-    <div className="space-y-24 pb-20">
-      {/* ── HERO SECTION WITH DUAL SCREEN SHOWCASE & INSTANT CONTACT ── */}
-      <section className="relative pt-8 sm:pt-16 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Glow Ambient Filter */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-blue-600/15 via-amber-500/10 to-transparent blur-3xl pointer-events-none" />
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormSubmitting(true);
+    try {
+      const res = await fetch("/api/inquiries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          service: formData.service,
+          phone: formData.contact,
+          email: formData.contact.includes("@") ? formData.contact : "",
+          message: formData.message,
+        }),
+      });
+      if (res.ok) {
+        setFormSubmitted(true);
+      } else {
+        alert("Thank you! Please also message us on WhatsApp for fastest deployment.");
+        setFormSubmitted(true);
+      }
+    } catch {
+      setFormSubmitted(true);
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
 
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+  const renderServiceIcon = (type: ServiceItem["icon"]) => {
+    switch (type) {
+      case "package":
+        return <Package className="w-5 h-5 text-white" />;
+      case "hardhat":
+        return <HardHat className="w-5 h-5 text-white" />;
+      case "wrench":
+        return <Wrench className="w-5 h-5 text-white" />;
+      case "sparkles":
+        return <Sparkles className="w-5 h-5 text-white" />;
+    }
+  };
+
+  return (
+    <div className="flex flex-col w-full bg-white">
+      {/* ─────────────────────────────────────────────────────────────
+          1. HERO SECTION (DUBAI SKYLINE + FACILITY MANAGEMENT HEADLINE)
+          ───────────────────────────────────────────────────────────── */}
+      <section className="relative min-h-[580px] lg:min-h-[640px] flex items-center bg-[#071326] overflow-hidden">
+        {/* Background Dubai Skyline Image */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/images/hero_dubai_skyline.jpg"
+            alt="Vejara Facility Management Services Dubai Skyline"
+            className="w-full h-full object-cover object-center"
+          />
+          {/* Left Dark Gradient Vignette for Razor-Sharp Text Legibility */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#071326] via-[#071326]/85 sm:via-[#071326]/75 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#071326]/80 via-transparent to-[#071326]/30" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 relative z-10 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
-            {/* Left Column: Headline & Urgent Contact Icons */}
-            <div className="lg:col-span-7">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/80 text-xs font-semibold text-amber-400 mb-6 shadow-sm">
-                <img src="/images/logo-icon.svg" alt="Vejara" className="w-4 h-4 rounded shrink-0" />
-                <span>UAE’S #1 ON-DEMAND WAREHOUSE & LOGISTICS MANPOWER</span>
+            {/* Left Content Column */}
+            <div className="lg:col-span-8 max-w-2xl">
+              
+              {/* Kicker */}
+              <div className="text-xs sm:text-sm font-bold uppercase tracking-widest text-[#38BDF8] mb-4 flex items-center gap-2">
+                <span>PROFESSIONAL</span>
+                <span className="text-slate-400">•</span>
+                <span>RELIABLE</span>
+                <span className="text-slate-400">•</span>
+                <span>EFFICIENT</span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.12]">
-                Vetted Warehouse Helpers, Picker-Packers & Crew in{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E88030] to-[#FAB028]">
-                  24 to 48 Hours
+              {/* Main Headline */}
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.12]">
+                Your Trusted Partner in{" "}
+                <span className="text-[#38BDF8] block sm:inline">
+                  Facility Management Services
                 </span>
               </h1>
 
-              <p className="mt-5 text-base sm:text-lg text-slate-300 leading-relaxed">
-                Empower your warehouse fulfillment across Dubai, Abu Dhabi, and UAE. 100% legal MOHRE visas, WPS compliance, and zero recruitment overhead for 3PLs and logistics operators.
+              {/* Subtitle */}
+              <p className="mt-4 sm:mt-6 text-sm sm:text-base lg:text-lg text-slate-200 leading-relaxed max-w-xl">
+                We provide skilled manpower and professional support services to keep your business running smoothly.
               </p>
 
-              {/* ── HERO INSTANT CONTACT BAR (WHATSAPP, CALL, QUOTE) ── */}
-              <div className="mt-8 p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 shadow-2xl flex flex-wrap sm:flex-nowrap items-center gap-2">
-                {/* 1. WhatsApp Instant */}
-                <a
-                  href={`https://wa.me/${whatsapp}?text=Hello%20Vejara%20Facility,%20I%20need%20urgent%20manpower%20assistance.`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 min-w-[150px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#20ba5a] text-slate-950 font-bold text-xs shadow-md shadow-emerald-500/20 transition transform hover:-translate-y-0.5"
-                >
-                  <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
-                    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.54 1.772.827 2.791.827 3.182 0 5.768-2.587 5.768-5.767.001-3.18-2.585-5.782-5.768-5.782zm0 10.435c-.886 0-1.688-.261-2.434-.694l-.174-.103-1.81.475.483-1.764-.113-.18c-.477-.759-.729-1.574-.728-2.433.001-2.571 2.093-4.663 4.666-4.663 2.573 0 4.665 2.092 4.665 4.664s-2.092 4.698-4.666 4.698zm6.549-11.879c-1.751-1.751-4.079-2.716-6.551-2.716-5.105 0-9.256 4.15-9.258 9.257 0 1.632.426 3.224 1.236 4.629l-1.314 4.799 4.912-1.288c1.353.738 2.875 1.127 4.424 1.127 5.106 0 9.258-4.151 9.259-9.258 0-2.473-.964-4.799-2.708-6.55z" />
-                  </svg>
-                  <span>Chat on WhatsApp</span>
-                </a>
-
-                {/* 2. Urgent Phone Call */}
-                <a
-                  href={`tel:${phone}`}
-                  className="flex-1 min-w-[150px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition"
-                >
-                  <PhoneCall className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Call {phone}</span>
-                </a>
-
-                {/* 3. Quick Quote Form */}
-                <Link
-                  href="#inquiry"
-                  className="w-full sm:w-auto flex items-center justify-center gap-1.5 py-3 px-5 rounded-xl bg-gradient-to-r from-[#E88030] to-[#FAB028] text-slate-950 font-bold text-xs shadow-md transition hover:brightness-110"
-                >
-                  <span>Request Quote</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="mt-8 pt-6 border-t border-slate-800 grid grid-cols-3 gap-4 text-xs text-slate-400">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span><strong>100% MOHRE</strong> legal visa & WPS</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span><strong>24-48 Hours</strong> deployment</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FileCheck2 className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span><strong>Trained</strong> in RF scanners</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Hero Visual Showcase with Real Image */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative rounded-2xl overflow-hidden border border-slate-700/80 shadow-2xl shadow-black/80 group">
-                <img
-                  src="/images/hero_warehouse.jpg"
-                  alt="Modern UAE logistics fulfillment warehouse in Dubai"
-                  className="w-full h-[460px] object-cover object-center group-hover:scale-105 transition-transform duration-700"
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-[#080F1A] via-transparent to-black/20" />
-
-                {/* Floating Badge 1: MOHRE & Active Manpower */}
-                <div className="absolute top-4 left-4 p-3 rounded-xl bg-slate-900/85 backdrop-blur-md border border-slate-700 shadow-xl flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-                    <Users className="w-5 h-5" />
+              {/* 4 Feature Badges (Horizontal Row) */}
+              <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+                
+                {/* 1. Skilled Workforce */}
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full border border-sky-400/60 bg-sky-500/10 flex items-center justify-center shrink-0">
+                    <Users className="w-4 h-4 text-sky-400" />
                   </div>
-                  <div>
-                    <div className="text-xs font-bold text-white">500+ Active Personnel</div>
-                    <div className="text-[10px] text-emerald-400 font-medium">Dubai • Abu Dhabi • Sharjah</div>
-                  </div>
-                </div>
-
-                {/* Floating Badge 2: Rapid Response Guarantee */}
-                <div className="absolute bottom-4 right-4 p-3 rounded-xl bg-slate-900/85 backdrop-blur-md border border-slate-700 shadow-xl flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
-                    <Clock className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-white">Rapid 24-48h Mobilization</div>
-                    <div className="text-[10px] text-slate-300">Guaranteed Shift Replacement</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ── KEY PERFORMANCE METRICS BAR ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-6 sm:p-8 rounded-2xl bg-[#0D1829] border border-slate-800 shadow-xl">
-          <div>
-            <div className="text-3xl sm:text-4xl font-extrabold text-white">500+</div>
-            <div className="text-xs sm:text-sm text-slate-400 mt-1">Active Manpower Deployed</div>
-          </div>
-          <div>
-            <div className="text-3xl sm:text-4xl font-extrabold text-amber-400">24h</div>
-            <div className="text-xs sm:text-sm text-slate-400 mt-1">Urgent Shift Replacement</div>
-          </div>
-          <div>
-            <div className="text-3xl sm:text-4xl font-extrabold text-white">99.4%</div>
-            <div className="text-xs sm:text-sm text-slate-400 mt-1">Attendance & Punctuality</div>
-          </div>
-          <div>
-            <div className="text-3xl sm:text-4xl font-extrabold text-amber-400">0%</div>
-            <div className="text-xs sm:text-sm text-slate-400 mt-1">Visa & Recruitment Liability</div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── INTERACTIVE MANPOWER CALCULATOR SECTION ── */}
-      <section id="calculator" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-24">
-        <ManpowerCalculator />
-      </section>
-
-      {/* ── CORE SERVICES SECTION WITH REAL PHOTOGRAPHY ── */}
-      <section id="services" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-24">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="text-xs font-bold uppercase tracking-wider text-[#E88030] mb-2">Our Core Solutions</div>
-          <h2 className="text-3xl sm:text-4xl font-black text-white">Specialized Logistics & Warehouse Manpower</h2>
-          <p className="mt-4 text-sm text-slate-400 leading-relaxed">
-            Supplying dedicated, vetted, and safety-trained teams tailored to the operational pace of modern distribution centers.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {INITIAL_SERVICES.map((service) => {
-            const imagePath = SERVICE_IMAGE_MAP[service.slug] || "/images/picker_packer.jpg";
-            return (
-              <div
-                key={service.slug}
-                className="rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-amber-500/50 transition-all duration-300 flex flex-col justify-between group overflow-hidden hover:shadow-2xl hover:shadow-slate-950"
-              >
-                {/* Service Card Photography */}
-                <div className="relative h-48 w-full overflow-hidden bg-slate-800">
-                  <img
-                    src={imagePath}
-                    alt={service.title}
-                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-black/20" />
-                  
-                  <span className="absolute top-3 right-3 text-[11px] font-semibold px-2.5 py-1 rounded bg-slate-900/80 backdrop-blur-md text-amber-400 border border-slate-700 shadow">
-                    {service.badge}
+                  <span className="text-xs font-semibold text-slate-100 leading-tight">
+                    Skilled<br />Workforce
                   </span>
                 </div>
 
-                {/* Card Body */}
-                <div className="p-6 flex-grow flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-base font-bold text-white group-hover:text-amber-400 transition leading-snug">
-                      {service.title}
-                    </h3>
-                    <p className="mt-2 text-xs text-slate-400 line-clamp-3 leading-relaxed">
-                      {service.shortDesc}
-                    </p>
+                {/* 2. Safe & Reliable */}
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full border border-sky-400/60 bg-sky-500/10 flex items-center justify-center shrink-0">
+                    <ShieldCheck className="w-4 h-4 text-sky-400" />
+                  </div>
+                  <span className="text-xs font-semibold text-slate-100 leading-tight">
+                    Safe & Reliable<br />Services
+                  </span>
+                </div>
 
-                    <div className="mt-4 space-y-2 border-t border-slate-800/80 pt-4">
-                      {service.features.slice(0, 3).map((feat, i) => (
-                        <div key={i} className="flex items-start gap-2 text-xs text-slate-300">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                          <span>{feat}</span>
-                        </div>
-                      ))}
+                {/* 3. Flexible Solutions */}
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full border border-sky-400/60 bg-sky-500/10 flex items-center justify-center shrink-0">
+                    <RefreshCw className="w-4 h-4 text-sky-400" />
+                  </div>
+                  <span className="text-xs font-semibold text-slate-100 leading-tight">
+                    Flexible<br />Solutions
+                  </span>
+                </div>
+
+                {/* 4. 24/7 Support */}
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full border border-sky-400/60 bg-sky-500/10 flex items-center justify-center shrink-0">
+                    <Clock className="w-4 h-4 text-sky-400" />
+                  </div>
+                  <span className="text-xs font-semibold text-slate-100 leading-tight">
+                    24/7<br />Support
+                  </span>
+                </div>
+
+              </div>
+
+              {/* Primary Call to Action Button */}
+              <div className="mt-10 flex flex-wrap items-center gap-4">
+                <Link
+                  href="#quote"
+                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#0284C7] hover:bg-[#0369A1] text-white text-sm font-bold shadow-xl shadow-sky-500/30 transition transform hover:-translate-y-0.5"
+                >
+                  <span>Get a Free Quote</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+
+                <a
+                  href={`https://wa.me/${whatsapp}?text=Hello%20Vejara%20Facility,%20I%20would%20like%20to%20inquire%20about%20your%20services.`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-slate-900/80 hover:bg-[#25D366] text-white hover:text-slate-950 border border-slate-700 hover:border-[#25D366] text-sm font-semibold transition"
+                >
+                  <span>WhatsApp Inquiry</span>
+                </a>
+              </div>
+
+            </div>
+
+            {/* Right Side: Script Callout over the Skyline */}
+            <div className="lg:col-span-4 flex justify-end items-end relative lg:h-full pt-6 lg:pt-0">
+              <div className="bg-slate-950/40 backdrop-blur-sm p-6 rounded-2xl border border-white/10 lg:translate-y-12">
+                <p className="font-script text-white text-3xl sm:text-4xl lg:text-5xl leading-tight -rotate-2 select-none drop-shadow-lg">
+                  Better People<br />
+                  Better Spaces<br />
+                  A Stronger Tomorrow
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────────
+          2. OUR SERVICES SECTION (4 COMPLETE FACILITY SOLUTION CARDS)
+          ───────────────────────────────────────────────────────────── */}
+      <section id="services" className="py-20 bg-white scroll-mt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-[#0284C7] mb-2">
+              <span className="w-8 h-px bg-[#0284C7]" />
+              <span>OUR SERVICES</span>
+              <span className="w-8 h-px bg-[#0284C7]" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0B1B33] tracking-tight">
+              Complete Facility Management Solutions
+            </h2>
+            <p className="mt-3 text-sm sm:text-base text-slate-600">
+              We offer a wide range of professional services to meet your business needs.
+            </p>
+          </div>
+
+          {/* 4 Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {SERVICES.map((service) => (
+              <div
+                key={service.id}
+                className="bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-sky-300 transition-all duration-300 flex flex-col justify-between overflow-hidden group"
+              >
+                <div>
+                  {/* Service Image with Floating Blue Circular Badge */}
+                  <div className="relative h-52 w-full overflow-hidden bg-slate-100">
+                    <img
+                      src={service.image}
+                      alt={service.title}
+                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    />
+                    
+                    {/* Floating Blue Circle Badge */}
+                    <div className="absolute -bottom-5 left-5 w-12 h-12 rounded-full bg-[#0284C7] border-4 border-white shadow-md flex items-center justify-center z-10">
+                      {renderServiceIcon(service.icon)}
                     </div>
                   </div>
 
-                  {/* Card Action */}
-                  <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between">
-                    <span className="text-[11px] font-medium text-slate-400">
-                      Mobilization: <strong className="text-amber-400">{service.deploymentTime}</strong>
-                    </span>
-                    <a
-                      href={`https://wa.me/${whatsapp}?text=Hello,%20I%20am%20interested%20in%20${encodeURIComponent(service.title)}.`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs font-bold text-white group-hover:text-amber-400 flex items-center gap-1 transition"
-                    >
-                      Book on WhatsApp <ChevronRight className="w-3.5 h-3.5" />
-                    </a>
+                  {/* Card Content */}
+                  <div className="pt-8 px-5 pb-4">
+                    <h3 className="text-lg font-bold text-[#0B1B33] group-hover:text-[#0284C7] transition-colors">
+                      {service.title}
+                    </h3>
+                    <p className="mt-2 text-xs text-slate-500 leading-relaxed min-h-[48px]">
+                      {service.description}
+                    </p>
+
+                    {/* Bullet Points */}
+                    <ul className="mt-4 space-y-2 border-t border-slate-100 pt-4">
+                      {service.points.map((pt, idx) => (
+                        <li key={idx} className="flex items-center gap-2 text-xs text-slate-700">
+                          <Check className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
+                          <span>{pt}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
 
-      {/* ── PHOTO FEATURE: OUR DEPLOYED TEAMS IN DUBAI & UAE ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-br from-[#0D1829] to-[#050A12] border border-slate-800 shadow-2xl overflow-hidden relative">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-6 space-y-5">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Field Excellence</span>
-              <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight">
-                Safety-Certified Personnel Ready For Day 1 High Productivity
-              </h2>
-              <p className="text-sm text-slate-300 leading-relaxed">
-                Every team member deployed by Vejara Facility Services undergoes safety induction, barcode scanner operation drills, and UAE warehouse health protocols before stepping onto your distribution floor.
-              </p>
-
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="p-4 rounded-xl bg-slate-900/70 border border-slate-800">
-                  <div className="font-bold text-white text-sm">Full PPE Included</div>
-                  <div className="text-xs text-slate-400 mt-1">Steel-toe boots, hi-vis vests & safety gear provided.</div>
+                {/* Card Action */}
+                <div className="px-5 pb-5 pt-2">
+                  <button
+                    onClick={() => setSelectedService(service)}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0284C7] hover:text-[#0369A1] transition group/btn"
+                  >
+                    <span>Learn More</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                  </button>
                 </div>
-                <div className="grid-cols-1 p-4 rounded-xl bg-slate-900/70 border border-slate-800">
-                  <div className="font-bold text-white text-sm">Bilingual Supervisors</div>
-                  <div className="text-xs text-slate-400 mt-1">English, Arabic & Hindi speaking leads for smooth ops.</div>
-                </div>
-              </div>
 
-              <div className="pt-4 flex flex-wrap gap-4">
-                <a
-                  href={`tel:${phone}`}
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#E88030] to-[#FAB028] text-slate-950 font-bold text-xs shadow-md transition hover:brightness-110 flex items-center gap-2"
-                >
-                  <PhoneCall className="w-4 h-4" />
-                  <span>Call Operations Manager</span>
-                </a>
-              </div>
-            </div>
-
-            <div className="lg:col-span-6">
-              <div className="rounded-2xl overflow-hidden border border-slate-700 shadow-xl">
-                <img
-                  src="/images/facility_team.jpg"
-                  alt="Vejara Facility Services workforce deployment team"
-                  className="w-full h-80 sm:h-96 object-cover object-center hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── INDUSTRIES WE SERVE ── */}
-      <section className="bg-[#050A12] py-20 border-y border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <div className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">Sectors & Facilities</div>
-            <h2 className="text-3xl font-black text-white">Engineered For Your Industry Pace</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {INDUSTRY_SECTORS.map((sector, i) => (
-              <div key={i} className="p-6 rounded-xl bg-slate-900/40 border border-slate-800">
-                <div className="text-amber-400 mb-3">
-                  <Warehouse className="w-8 h-8" />
-                </div>
-                <h3 className="text-base font-bold text-white mb-2">{sector.title}</h3>
-                <p className="text-xs text-slate-400 leading-relaxed mb-4">{sector.desc}</p>
-                <div className="text-[11px] font-medium text-amber-400/90">{sector.metric}</div>
               </div>
             ))}
           </div>
+
         </div>
       </section>
 
-      {/* ── WHY CHOOSE US ── */}
-      <section id="why-us" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-[#E88030] mb-2">The Vejara Advantage</div>
-            <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight">
-              Eliminate Manpower Bottlenecks Without Administrative Headaches
-            </h2>
-            <p className="mt-4 text-sm text-slate-400 leading-relaxed">
-              We assume the entire legal, visa, accommodation, medical insurance, and transportation responsibility. You simply set the shift schedule, and our vetted manpower delivers.
-            </p>
+      {/* ─────────────────────────────────────────────────────────────
+          3. SPLIT SECTION: ABOUT VEJARA + WHY CHOOSE US
+          ───────────────────────────────────────────────────────────── */}
+      <section id="about" className="overflow-hidden border-y border-slate-200 scroll-mt-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[460px]">
+          
+          {/* Left Block: ABOUT VEJARA (Dark Navy with Skyline) */}
+          <div className="lg:col-span-5 bg-[#0B1B33] relative p-8 sm:p-12 lg:p-16 flex flex-col justify-center text-white overflow-hidden">
+            {/* Skyline Silhouette Backdrop */}
+            <div
+              className="absolute inset-0 opacity-20 pointer-events-none bg-cover bg-center"
+              style={{ backgroundImage: "url('/images/hero_dubai_skyline.jpg')" }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0B1B33] via-[#0B1B33]/90 to-[#0B1B33]" />
 
-            <div className="mt-8 space-y-4">
-              <div className="flex gap-4 p-4 rounded-xl bg-slate-900/50 border border-slate-800">
-                <ShieldCheck className="w-6 h-6 text-amber-400 shrink-0 mt-1" />
-                <div>
-                  <h3 className="text-sm font-bold text-white">100% Legal & MOHRE Compliance</h3>
-                  <p className="text-xs text-slate-400 mt-1">All employees hold valid UAE employment visas, Emirates IDs, and comply with Wage Protection System (WPS).</p>
-                </div>
-              </div>
+            <div className="relative z-10 max-w-md">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#38BDF8] mb-3 block">
+                ABOUT VEJARA
+              </span>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight">
+                Providing Skilled Support for a Better Tomorrow
+              </h2>
+              <p className="mt-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Vejara Facility Management Services is a trusted provider of manpower and support services in UAE. We are committed to delivering quality, reliability and professionalism in every project we handle.
+              </p>
 
-              <div className="flex gap-4 p-4 rounded-xl bg-slate-900/50 border border-slate-800">
-                <Users className="w-6 h-6 text-amber-400 shrink-0 mt-1" />
-                <div>
-                  <h3 className="text-sm font-bold text-white">Dedicated On-Site Team Supervisors</h3>
-                  <p className="text-xs text-slate-400 mt-1">For teams over 10 staff, we deploy bilingual supervisors to ensure attendance, safety compliance, and KPI targets.</p>
-                </div>
-              </div>
-
-              <div className="flex gap-4 p-4 rounded-xl bg-slate-900/50 border border-slate-800">
-                <TrendingUp className="w-6 h-6 text-amber-400 shrink-0 mt-1" />
-                <div>
-                  <h3 className="text-sm font-bold text-white">Instant Peak-Season Scalability</h3>
-                  <p className="text-xs text-slate-400 mt-1">Instantly ramp from 5 to 50+ staff during Ramadan, White Friday, and high-volume order surges with zero offboarding penalties.</p>
-                </div>
+              <div className="mt-8">
+                <Link
+                  href="#contact"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-white/40 text-white hover:bg-white hover:text-[#0B1B33] text-xs font-semibold transition"
+                >
+                  <span>Learn More About Us</span>
+                  <span className="text-sm font-bold">+</span>
+                </Link>
               </div>
             </div>
           </div>
 
-          <div id="coverage" className="p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-[#0D1829] border border-slate-800 relative shadow-2xl scroll-mt-24">
-            <h3 className="text-xl font-bold text-white mb-6">UAE Strategic Coverage Zones</h3>
-            <div className="space-y-4 text-sm">
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-                <div className="font-semibold text-amber-400 flex items-center gap-2">
-                  <MapPin className="w-4 h-4" /> Dubai Logistics Corridor
+          {/* Right Block: WHY CHOOSE US (Crisp Light Background) */}
+          <div id="why-us" className="lg:col-span-7 bg-[#F8FAFC] p-8 sm:p-12 lg:p-16 flex flex-col justify-center scroll-mt-20">
+            <div className="max-w-xl">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#0284C7] mb-2 block">
+                WHY CHOOSE US
+              </span>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#0B1B33] tracking-tight">
+                Your Success is Our Priority
+              </h2>
+
+              {/* 2x2 Grid of Solid Navy Circles */}
+              <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                
+                {/* 1. Skilled & Trained Workforce */}
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-[#0B1B33] flex items-center justify-center shrink-0 shadow-md">
+                    <Users className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[#0B1B33]">
+                      Skilled & Trained Workforce
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                      Professional and experienced staff for every service.
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-300 mt-1">JAFZA, Dubai South (DWC), Al Quoz Industrial Area, Ras Al Khor, National Industries Park (NIP).</p>
+
+                {/* 2. Reliable & On-Time */}
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-[#0B1B33] flex items-center justify-center shrink-0 shadow-md">
+                    <ShieldCheck className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[#0B1B33]">
+                      Reliable & On-Time
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                      We deliver as promised, when you need us.
+                    </p>
+                  </div>
+                </div>
+
+                {/* 3. Quality Service */}
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-[#0B1B33] flex items-center justify-center shrink-0 shadow-md">
+                    <Star className="w-5 h-5 text-white fill-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[#0B1B33]">
+                      Quality Service
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                      Committed to high standards and customer satisfaction.
+                    </p>
+                  </div>
+                </div>
+
+                {/* 4. Flexible Solutions */}
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-full bg-[#0B1B33] flex items-center justify-center shrink-0 shadow-md">
+                    <Handshake className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[#0B1B33]">
+                      Flexible Solutions
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                      Customized services to fit your business needs.
+                    </p>
+                  </div>
+                </div>
+
               </div>
 
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-                <div className="font-semibold text-amber-400 flex items-center gap-2">
-                  <MapPin className="w-4 h-4" /> Abu Dhabi Industrial Zones
-                </div>
-                <p className="text-xs text-slate-300 mt-1">Mussafah Industrial City, ICAD 1-3, KIZAD, Khalifa Port, and Al Ain logistics centers.</p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-                <div className="font-semibold text-amber-400 flex items-center gap-2">
-                  <MapPin className="w-4 h-4" /> Sharjah & Northern Emirates
-                </div>
-                <p className="text-xs text-slate-300 mt-1">SAIF Zone, Hamriyah Free Zone, Sharjah Industrial Areas 1-18, and Ajman.</p>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-6 border-t border-slate-800 text-center">
-              <span className="text-xs text-slate-400">Need immediate mobilization?</span>
-              <a
-                href={`https://wa.me/${whatsapp}?text=URGENT:%20Need%20workforce%20in%20UAE`}
-                className="mt-2 block w-full py-3 rounded-lg bg-[#25D366] text-slate-950 font-bold text-xs hover:brightness-110 transition shadow-lg shadow-emerald-500/20"
-              >
-                Connect on WhatsApp Dispatch (+971 4 388 5003)
-              </a>
             </div>
           </div>
+
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ── */}
-      <section id="testimonials" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-24">
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">Verified Feedback</div>
-          <h2 className="text-3xl font-black text-white">Trusted by Leading UAE Supply Chain Operators</h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {INITIAL_TESTIMONIALS.map((t, idx) => (
-            <div key={idx} className="p-6 rounded-xl bg-slate-900/60 border border-slate-800 flex flex-col justify-between">
+      {/* ─────────────────────────────────────────────────────────────
+          4. KEY METRICS / STATS BAR (FULL WIDTH DARK NAVY)
+          ───────────────────────────────────────────────────────────── */}
+      <section className="bg-[#071529] py-10 border-b border-slate-800 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-800">
+            
+            {/* Metric 1 */}
+            <div className="flex items-center gap-4 px-4 pt-4 sm:pt-0">
+              <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center shrink-0">
+                <HardHat className="w-6 h-6 text-sky-400" />
+              </div>
               <div>
-                <div className="flex gap-1 text-amber-400 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed italic">
-                  "{t.quote}"
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-slate-800/80">
-                <div className="text-xs font-bold text-white">{t.clientName}</div>
-                <div className="text-[11px] text-amber-400/90">{t.designation} — {t.company}</div>
+                <div className="text-xs text-slate-400 font-medium">Skilled Workers</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-white mt-0.5">100+</div>
               </div>
             </div>
-          ))}
+
+            {/* Metric 2 */}
+            <div className="flex items-center gap-4 px-4 pt-4 sm:pt-0">
+              <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center shrink-0">
+                <Building2 className="w-6 h-6 text-sky-400" />
+              </div>
+              <div>
+                <div className="text-xs text-slate-400 font-medium">Projects Completed</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-white mt-0.5">200+</div>
+              </div>
+            </div>
+
+            {/* Metric 3 */}
+            <div className="flex items-center gap-4 px-4 pt-4 sm:pt-0">
+              <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center shrink-0">
+                <Handshake className="w-6 h-6 text-sky-400" />
+              </div>
+              <div>
+                <div className="text-xs text-slate-400 font-medium">Happy Clients</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-white mt-0.5">100+</div>
+              </div>
+            </div>
+
+            {/* Metric 4 */}
+            <div className="flex items-center gap-4 px-4 pt-4 sm:pt-0">
+              <div className="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center shrink-0">
+                <Clock className="w-6 h-6 text-sky-400" />
+              </div>
+              <div>
+                <div className="text-xs text-slate-400 font-medium">Support 24/7</div>
+                <div className="text-2xl sm:text-3xl font-extrabold text-white mt-0.5">Always</div>
+              </div>
+            </div>
+
+          </div>
         </div>
       </section>
 
-      {/* ── INQUIRY QUOTE FORM ── */}
-      <section id="inquiry" className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-24">
-        <div className="p-8 sm:p-12 rounded-2xl bg-gradient-to-b from-slate-900 to-[#0A1220] border border-slate-800 shadow-2xl">
-          <div className="text-center mb-8">
-            <div className="mb-3"><Logo size="sm" asLink={false} /></div>
-              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Fast Turnaround Quote</span>
-            <h2 className="text-2xl sm:text-3xl font-black text-white mt-1">Request Manpower Deployment</h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-2">
-              Fill in your staff requirements below. Our commercial desk will contact you with rate cards and candidate availability within 2 business hours.
-            </p>
+      {/* ─────────────────────────────────────────────────────────────
+          5. OUR WORK IN ACTION / GALLERY
+          ───────────────────────────────────────────────────────────── */}
+      <section id="gallery" className="py-20 bg-white scroll-mt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Header Row */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-12">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-widest text-[#0284C7] mb-2 block">
+                OUR WORK IN ACTION
+              </span>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#0B1B33]">
+                See Our Services in Action
+              </h2>
+            </div>
+            
+            <button
+              onClick={() => setGalleryModalOpen(true)}
+              className="inline-flex items-center gap-2 px-6 py-2 rounded-full border border-[#0284C7] text-[#0284C7] hover:bg-[#0284C7] hover:text-white text-xs font-bold transition shadow-sm"
+            >
+              <span>View Gallery</span>
+            </button>
           </div>
 
-          <form
-            onSubmit={undefined}
-            action="#"
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs"
-          >
-            <div>
-              <label className="block text-slate-300 font-medium mb-1">Full Name *</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. John Doe"
-                className="w-full px-3.5 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-medium mb-1">Company / Organization *</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Apex 3PL Logistics LLC"
-                className="w-full px-3.5 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-medium mb-1">Corporate Email *</label>
-              <input
-                type="email"
-                required
-                placeholder="name@company.com"
-                className="w-full px-3.5 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-medium mb-1">UAE Phone Number *</label>
-              <input
-                type="tel"
-                required
-                placeholder="+971 50 000 0000"
-                className="w-full px-3.5 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-medium mb-1">Service Type *</label>
-              <select className="w-full px-3.5 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-amber-400">
-                <option>Warehouse Helpers / General Labor</option>
-                <option>Picker & Packer Teams</option>
-                <option>Inventory Controllers & Sorters</option>
-                <option>Forklift & Reach Truck Operators</option>
-                <option>Facility Cleaning & Janitorial Crew</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-medium mb-1">Number of Staff Needed</label>
-              <select className="w-full px-3.5 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-amber-400">
-                <option>1 - 5 staff</option>
-                <option>6 - 15 staff</option>
-                <option>16 - 30 staff</option>
-                <option>30+ workforce (Large project)</option>
-              </select>
-            </div>
-
-            <div className="sm:col-span-2">
-              <label className="block text-slate-300 font-medium mb-1">Facility Location & Special Instructions</label>
-              <textarea
-                rows={3}
-                placeholder="Location (e.g., Al Quoz, Mussafah), shift timing, and start date..."
-                className="w-full px-3.5 py-2.5 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
-              ></textarea>
-            </div>
-
-            <div className="sm:col-span-2 mt-2">
-              <button
-                type="submit"
-                className="w-full py-3.5 rounded-lg bg-gradient-to-r from-[#E88030] to-[#FAB028] text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/25 hover:brightness-110 transition"
+          {/* 4 Widescreen Image Cards with Different Action Photography */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {GALLERY_ITEMS.map((item, idx) => (
+              <div
+                key={item.id}
+                onClick={() => {
+                  setActiveGalleryIndex(idx);
+                  setGalleryModalOpen(true);
+                }}
+                className="relative h-60 rounded-xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 group cursor-pointer bg-slate-900 border border-slate-100 hover:border-sky-300"
               >
-                Submit Manpower Request (2hr Response)
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                />
+                
+                {/* Dark Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/30 to-transparent" />
+
+                {/* Bottom Title Bar with Category */}
+                <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400 block mb-0.5">
+                      {item.category}
+                    </span>
+                    <span className="text-sm font-bold text-white group-hover:text-sky-300 transition-colors leading-tight block">
+                      {item.title}
+                    </span>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ExternalLink className="w-4 h-4" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────────
+          6. GET IN TOUCH / REQUEST A FREE QUOTE (DARK NAVY WITH SKYLINE)
+          ───────────────────────────────────────────────────────────── */}
+      <section id="quote" className="py-20 bg-[#071529] text-white relative overflow-hidden scroll-mt-20">
+        
+        {/* Subtle Skyline Backdrop Silhouette on Left */}
+        <div
+          className="absolute inset-0 opacity-15 pointer-events-none bg-cover bg-left"
+          style={{ backgroundImage: "url('/images/hero_dubai_skyline.jpg')" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#071529] via-[#071529]/95 to-[#071529]" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            
+            {/* Left Headline & Details */}
+            <div className="lg:col-span-5 space-y-4">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#38BDF8] block">
+                GET IN TOUCH
+              </span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight">
+                Request a Free Quote
+              </h2>
+              <p className="text-sm text-slate-300 leading-relaxed max-w-md">
+                Tell us about your requirements and we will get back to you as soon as possible.
+              </p>
+
+              {/* Contact Desk Highlights */}
+              <div className="pt-6 space-y-3 text-xs text-slate-300">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-sky-500/10 border border-sky-400/30 flex items-center justify-center text-sky-400">
+                    <Phone className="w-4 h-4" />
+                  </div>
+                  <span>{phone}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-sky-500/10 border border-sky-400/30 flex items-center justify-center text-sky-400">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <span>info@vejarafacility.com</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-sky-500/10 border border-sky-400/30 flex items-center justify-center text-sky-400">
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  <span>Dubai, United Arab Emirates</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Quote Submission Form */}
+            <div className="lg:col-span-7">
+              {formSubmitted ? (
+                <div className="p-8 rounded-2xl bg-[#0B1E3B]/90 border border-sky-500/40 text-center space-y-4 animate-fade-in shadow-2xl">
+                  <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">Quote Request Received!</h3>
+                  <p className="text-xs text-slate-300 max-w-md mx-auto">
+                    Thank you, <strong className="text-white">{formData.name || "Client"}</strong>. Our facility operations desk will contact you within 2 hours.
+                  </p>
+                  <div className="pt-2">
+                    <a
+                      href={`https://wa.me/${whatsapp}?text=Hi%20Vejara%20Facility,%20I%20just%20submitted%20a%20quote%20request%20for%20${encodeURIComponent(formData.service)}.`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#25D366] text-slate-950 font-bold text-xs hover:brightness-110 transition shadow-md"
+                    >
+                      <span>Fast-Track on WhatsApp</span>
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <form
+                  onSubmit={handleFormSubmit}
+                  className="space-y-4 bg-[#0A1A33]/70 backdrop-blur-md p-6 sm:p-8 rounded-2xl border border-slate-700/80 shadow-2xl"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Your Name */}
+                    <div>
+                      <label className="block text-xs font-medium text-slate-300 mb-1">
+                        Your Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="John Doe"
+                        className="w-full px-4 py-3 rounded-lg bg-[#0B1E3B]/80 border border-slate-700 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-sky-400 transition"
+                      />
+                    </div>
+
+                    {/* Select Service */}
+                    <div>
+                      <label className="block text-xs font-medium text-slate-300 mb-1">
+                        Select Service
+                      </label>
+                      <select
+                        value={formData.service}
+                        onChange={(e) => setFormData({ ...formData, service: e.target.value })}
+                        className="w-full px-4 py-3 rounded-lg bg-[#0B1E3B]/80 border border-slate-700 text-white text-xs focus:outline-none focus:border-sky-400 transition"
+                      >
+                        <option value="Labour Packing">Labour Packing</option>
+                        <option value="Construction Helper">Construction Helper</option>
+                        <option value="Maintenance Services">Maintenance Services</option>
+                        <option value="Cleaning Services">Cleaning Services</option>
+                        <option value="General Warehouse Support">General Warehouse Support</option>
+                        <option value="Integrated Facility Management">Integrated Facility Management</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Your Email / Phone */}
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Your Email or Phone Number *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.contact}
+                      onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
+                      placeholder="e.g. info@company.com or +971 50 123 4567"
+                      className="w-full px-4 py-3 rounded-lg bg-[#0B1E3B]/80 border border-slate-700 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-sky-400 transition"
+                    />
+                  </div>
+
+                  {/* Your Message */}
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">
+                      Your Message *
+                    </label>
+                    <textarea
+                      required
+                      rows={4}
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      placeholder="Please describe your facility location, required headcount, and shift details..."
+                      className="w-full px-4 py-3 rounded-lg bg-[#0B1E3B]/80 border border-slate-700 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-sky-400 transition resize-none"
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={formSubmitting}
+                      className="w-full py-3.5 px-6 rounded-lg bg-[#0284C7] hover:bg-[#0369A1] text-white font-bold text-xs shadow-lg shadow-sky-500/25 transition flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {formSubmitting ? (
+                        <span>Submitting...</span>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          <span>Send Message</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ─────────────────────────────────────────────────────────────
+          7. MODAL: SERVICE DETAIL POPUP
+          ───────────────────────────────────────────────────────────── */}
+      {selectedService && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 animate-scale-up">
+            
+            {/* Modal Image Header */}
+            <div className="relative h-48 w-full bg-slate-900">
+              <img
+                src={selectedService.image}
+                alt={selectedService.title}
+                className="w-full h-full object-cover"
+              />
+              <button
+                onClick={() => setSelectedService(null)}
+                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-900/80 text-white flex items-center justify-center hover:bg-slate-900 transition"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
               </button>
             </div>
-          </form>
-        </div>
-      </section>
 
-      {/* ── FAQ SECTION ── */}
-      <section id="faq" className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-24">
-        <div className="text-center mb-12">
-          <div className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">Answers & Information</div>
-          <h2 className="text-3xl font-black text-white">Frequently Asked Questions</h2>
-        </div>
-
-        <div className="space-y-4">
-          {INITIAL_FAQS.map((faq, i) => (
-            <div key={i} className="p-5 rounded-xl bg-slate-900/60 border border-slate-800">
-              <h3 className="text-sm font-bold text-white flex items-center justify-between">
-                <span>{faq.question}</span>
-                <span className="text-amber-400 text-xs font-mono">Q{i + 1}</span>
+            {/* Modal Body */}
+            <div className="p-6">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase text-[#0284C7] mb-1">
+                <span>Vejara Facility Solutions</span>
+              </div>
+              <h3 className="text-xl font-bold text-[#0B1B33]">
+                {selectedService.title}
               </h3>
-              <p className="mt-2 text-xs text-slate-400 leading-relaxed">
-                {faq.answer}
+              <p className="mt-3 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                {selectedService.fullDetails}
               </p>
+
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <h4 className="text-xs font-bold text-[#0B1B33] uppercase mb-2">Scope Highlights:</h4>
+                <div className="grid grid-cols-1 gap-2">
+                  {selectedService.points.map((pt, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs text-slate-700">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#0284C7] shrink-0" />
+                      <span>{pt}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center gap-3">
+                <a
+                  href={`https://wa.me/${whatsapp}?text=Hello%20Vejara%20Facility,%20I%20am%20interested%20in%20${encodeURIComponent(selectedService.title)}.`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-3 rounded-xl bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-bold text-center transition shadow-md"
+                >
+                  Request Service Deployment
+                </a>
+                <button
+                  onClick={() => setSelectedService(null)}
+                  className="px-4 py-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold transition"
+                >
+                  Close
+                </button>
+              </div>
+
             </div>
-          ))}
+
+          </div>
         </div>
-      </section>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────
+          8. MODAL: GALLERY LIGHTBOX
+          ───────────────────────────────────────────────────────────── */}
+      {galleryModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+          <div className="relative max-w-4xl w-full bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
+            <button
+              onClick={() => setGalleryModalOpen(false)}
+              className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black transition"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="relative h-[420px] sm:h-[500px] w-full bg-black">
+              <img
+                src={GALLERY_ITEMS[activeGalleryIndex].image}
+                alt={GALLERY_ITEMS[activeGalleryIndex].title}
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            <div className="p-4 sm:p-6 bg-slate-900 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-white">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-sky-400">
+                  {GALLERY_ITEMS[activeGalleryIndex].category}
+                </span>
+                <h4 className="text-base sm:text-lg font-bold text-white mt-0.5">
+                  {GALLERY_ITEMS[activeGalleryIndex].title}
+                </h4>
+                <p className="text-xs text-slate-400 mt-1 max-w-lg">
+                  {GALLERY_ITEMS[activeGalleryIndex].description}
+                </p>
+              </div>
+
+              {/* Gallery Thumbnails Selector */}
+              <div className="flex items-center gap-2 shrink-0">
+                {GALLERY_ITEMS.map((item, idx) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveGalleryIndex(idx)}
+                    className={`w-12 h-9 rounded-lg overflow-hidden border-2 transition ${
+                      activeGalleryIndex === idx
+                        ? "border-sky-400 scale-105 shadow-md"
+                        : "border-transparent opacity-60 hover:opacity-100"
+                    }`}
+                  >
+                    <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
