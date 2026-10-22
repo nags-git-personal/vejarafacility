@@ -1,4 +1,4 @@
-#!/bin/bash
+﻿#!/bin/bash
 # ==============================================================================
 # VejaraFacility.com Deployment Script (VPS: 72.61.232.252 /var/www/vejarafacility)
 # Supports both Docker Compose (Recommended) and PM2 Standalone modes
@@ -26,7 +26,7 @@ fi
 
 # 2. Pull latest changes from git
 echo "--> Pulling latest changes from Git..."
-git pull origin main
+git pull origin main || git pull origin master
 
 # 3. Check deployment mode (Docker vs PM2)
 if command -v docker &> /dev/null && [ -f "docker-compose.yml" ]; then
@@ -105,3 +105,4 @@ else
   echo " Check logs: docker compose logs -n 50 OR pm2 logs vejarafacility-app"
   echo "=========================================="
 fi
+
