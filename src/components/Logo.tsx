@@ -15,27 +15,27 @@ export function Logo({
 }: LogoProps) {
   const iconSizes = {
     sm: "w-8 h-8 rounded-lg",
-    md: "w-11 h-11 rounded-xl",
-    lg: "w-14 h-14 rounded-2xl",
+    md: "w-10 h-10 rounded-xl",
+    lg: "w-12 h-12 rounded-xl",
   };
 
   const titleSizes = {
-    sm: "text-base tracking-tight",
-    md: "text-xl tracking-tight",
-    lg: "text-2xl sm:text-3xl tracking-tight",
+    sm: "text-sm sm:text-base tracking-tight",
+    md: "text-base sm:text-lg tracking-tight",
+    lg: "text-lg sm:text-xl tracking-tight",
   };
 
   const subtitleSizes = {
     sm: "text-[9px]",
     md: "text-[10px]",
-    lg: "text-xs",
+    lg: "text-[11px]",
   };
 
   const content = (
-    <div className={`flex items-center gap-3 select-none ${className}`}>
+    <div className={`flex items-center gap-2.5 select-none min-w-0 ${className}`}>
       {/* Brand Emblem */}
       <div
-        className={`${iconSizes[size]} overflow-hidden border border-slate-700/80 shadow-lg shadow-black/40 shrink-0 bg-[#080F1A] flex items-center justify-center p-0.5`}
+        className={`${iconSizes[size]} overflow-hidden border border-slate-700/80 shadow-md shadow-black/40 shrink-0 bg-[#080F1A] flex items-center justify-center p-0.5`}
       >
         <img
           src="/images/logo.jpg"
@@ -45,13 +45,13 @@ export function Logo({
       </div>
 
       {/* Brand Wordmark */}
-      <div className="flex flex-col">
-        <span className={`font-black text-white flex items-center gap-1.5 ${titleSizes[size]}`}>
+      <div className="flex flex-col min-w-0">
+        <span className={`font-black text-white flex items-center gap-1.5 whitespace-nowrap leading-tight ${titleSizes[size]}`}>
           VEJARA <span className="text-[#E88030]">FACILITY</span>
         </span>
         {showSubtitle && (
           <span
-            className={`tracking-wider uppercase text-slate-400 -mt-1 font-semibold ${subtitleSizes[size]}`}
+            className={`tracking-wider uppercase text-slate-400 font-semibold whitespace-nowrap overflow-hidden text-ellipsis ${subtitleSizes[size]}`}
           >
             Manpower & Logistics Services
           </span>
@@ -65,7 +65,7 @@ export function Logo({
   }
 
   return (
-    <Link href="/" className="hover:opacity-95 transition-opacity">
+    <Link href="/" className="hover:opacity-95 transition-opacity shrink-0">
       {content}
     </Link>
   );
