@@ -9,6 +9,8 @@ services:
     restart: always
     ports:
       - "3005:3005"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
       - PORT=3005
@@ -16,12 +18,12 @@ services:
       - DATABASE_URL=file:/app/prisma/prod.db
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin_vejara_2026}
       - NEXT_PUBLIC_SITE_NAME=Vejara Facility Services
-      - NEXT_PUBLIC_CONTACT_PHONE=+971 4 388 5003
-      - NEXT_PUBLIC_CONTACT_EMAIL=info@vejarafacility.com
-      - NEXT_PUBLIC_WHATSAPP_NUMBER=97143885003
-      - NEXT_PUBLIC_OFFICE_ADDRESS=OFF404A, Mohd Abna Rashid Mana AI Maktoum, MM Towers, Al Maktoum Rd, Riggat Al Buteen, Dubai, United Arab Emirates
-      - NEXT_PUBLIC_GOOGLE_MAPS_URL=https://maps.google.com/?q=OFF404A%2C%20Mohd%20Abna%20Rashid%20Mana%20AI%20Maktoum%2CMM%20Towers%20Al%20Maktoum%20Rd%20-%20Riggat%20Al%20Buteen%20-%20Dubai%20-%20United%20Arab%20Emirates
-      - NEXT_PUBLIC_WORKING_HOURS=Sunday – Saturday: 9:00 AM – 6:00 PM
+      - "NEXT_PUBLIC_CONTACT_PHONE=+971 4 388 5003"
+      - "NEXT_PUBLIC_CONTACT_EMAIL=info@vejarafacility.com"
+      - "NEXT_PUBLIC_WHATSAPP_NUMBER=97143885003"
+      - "NEXT_PUBLIC_OFFICE_ADDRESS=OFF404A, Mohd Abna Rashid Mana AI Maktoum, MM Towers, Al Maktoum Rd, Riggat Al Buteen, Dubai, United Arab Emirates"
+      - "NEXT_PUBLIC_GOOGLE_MAPS_URL=https://maps.google.com/?q=OFF404A%2C%20Mohd%20Abna%20Rashid%20Mana%20AI%20Maktoum%2CMM%20Towers%20Al%20Maktoum%20Rd%20-%20Riggat%20Al%20Buteen%20-%20Dubai%20-%20United%20Arab%20Emirates"
+      - "NEXT_PUBLIC_WORKING_HOURS=Sunday – Saturday: 9:00 AM – 6:00 PM"
     volumes:
       # Persistent volume for SQLite database so leads and content survive rebuilds
       - vejara_sqlite_data:/app/prisma
