@@ -1,4 +1,4 @@
-﻿#!/bin/bash
+#!/bin/bash
 # ==============================================================================
 # VejaraFacility.com Deployment Script (VPS: 72.61.232.252 /var/www/vejarafacility)
 # Supports both Docker Compose (Recommended) and PM2 Standalone modes
@@ -24,13 +24,19 @@ if [ -f "./scripts/backup.sh" ]; then
   bash ./scripts/backup.sh || echo "Notice: Initial backup skipped."
 fi
 
-# 2. Pull latest changes from git
-echo "--> Pulling latest changes from Git..."
-git pull origin main || git pull origin master
+# 2. Pull latest changes from git cleanly
+echo "--> Fetching latest changes from Git..."
+git fetch origin
+
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "master")
+echo "--> Current git branch: ${CURRENT_BRANCH}"
+
+# Discard any local untracked file conflicts on server and sync with remote
+git reset --hard "origin/${CURRENT_BRANCH}" 2>/dev/null || git reset --hard origin/master 2>/dev/null || git reset --hard origin/main
 
 # 3. Check deployment mode (Docker vs PM2)
 if command -v docker &> /dev/null && [ -f "docker-compose.yml" ]; then
-  echo "--> Docker detected. Deploying via Docker Compose..."
+  echo "--> Docker detected. Rebuilding without cache for fresh assets..."
   
   # Ensure .env exists
   if [ ! -f ".env" ]; then
@@ -38,9 +44,10 @@ if command -v docker &> /dev/null && [ -f "docker-compose.yml" ]; then
     cp .env.example .env
   fi
 
-  # Build and start container in detached mode
+  # Stop old container and rebuild without cache to avoid stale layer issues
   docker compose down || true
-  docker compose up -d --build
+  docker compose build --no-cache
+  docker compose up -d
 
   echo "--> Waiting for application container to initialize..."
   sleep 10
@@ -66,12 +73,15 @@ else
     node scripts/seed.mjs || true
   fi
 
-  # Build Next.js standalone application
+  # Clean previous build cache and rebuild Next.js standalone application
+  echo "--> Cleaning previous .next build cache..."
+  rm -rf .next
   echo "--> Building Next.js production standalone bundle..."
   npm run build
 
   # Copy static assets and public folder into standalone directory
   echo "--> Copying static files to standalone folder..."
+  rm -rf .next/standalone/public .next/standalone/.next/static
   cp -r public .next/standalone/
   cp -r .next/static .next/standalone/.next/
   mkdir -p .next/standalone/prisma
@@ -105,4 +115,3 @@ else
   echo " Check logs: docker compose logs -n 50 OR pm2 logs vejarafacility-app"
   echo "=========================================="
 fi
-
